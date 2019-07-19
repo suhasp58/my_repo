@@ -1,0 +1,38 @@
+git clone https://github.com/suhasp58/springclient.git
+git clone https://github.com/suhasp58/springserver.git
+git clone https://github.com/suhasp58/JSONFile.git
+cd springserver/src/main/resources
+echo 'server.port=8085' >application.properties
+echo 'filename=JSONFile/JSONFile.txt'>>application.properties
+echo 'ip=192.168.195.181' >>application.properties
+cd springclient/src/main/resources
+echo 'server.port=8086' >application.properties
+echo 'ip=192.168.195.181' >> application.properties
+mkdir /home/app/docker /home/app/docker1
+cd /home/app/docker
+echo 'FROM tomcat:8.0-alpine'>Dockerfile
+echo 'WORKDIR /'>>Dockerfile
+echo 'COPY /springredis.jar /usr/local/tomcat/webapps/springredis.jar'>>Dockerfile
+echo 'EXPOSE 8085'>>Dockerfile
+echo 'CMD ["catalina.sh","run"]'>>Dockerfile
+cd /home/app/docker1
+echo 'FROM tomcat:8.0-alpine'>Dockerfile
+echo 'WORKDIR /'>>Dockerfile
+echo 'COPY /springclient.jar /usr/local/tomcat/webapps/springclient.jar'>>Dockerfile
+echo 'EXPOSE 8086'>>Dockerfile
+echo 'CMD ["catalina.sh","run"]'>>Dockerfile
+cd /home/app/springserver
+mvn clean install
+cd target
+cp springredis-0.0.1-SNAPSHOT.jar /home/app/docker/springredis.jar
+cd /home/app/springclient
+mvn clean install
+cd target
+cp springclient-0.0.1-SNAPSHOT.jar /docker1/springclient.jar
+cd /home/app/docker
+docker build --tag=serverspring:v1 .
+docker run -d -p 8085:8085 serverspring:v1
+cd /home/docker1
+docker build --tag=clientspring:v1 .
+docker run -d -p 8086:8086 clientspring:v1
+
